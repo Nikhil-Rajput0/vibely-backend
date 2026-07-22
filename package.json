@@ -1,0 +1,31 @@
+{
+  "name": "vibely-backend",
+  "version": "1.0.0",
+  "description": "Vibely is a modern social networking platform designed for seamless communication and content sharing. Users can create posts, share stories and reels, chat privately in real time, receive instant notifications, and explore AI-powered features. Built with a scalable MERN architecture, Vibely focuses on performance, security, and an intuitive user experience.",
+  "keywords": [
+    "social-media",
+    "instagram-clone",
+    "chat"
+  ],
+  "homepage": "https://github.com/Nikhil-Rajput0/vibely-backend#readme",
+  "bugs": {
+    "url": "https://github.com/Nikhil-Rajput0/vibely-backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nikhil-Rajput0/vibely-backend.git"
+  },
+  "license": "ISC",
+  "author": "Nikhil Rajput",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.8.0"
+  }
+}
