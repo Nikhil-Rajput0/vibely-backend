@@ -1,9 +1,5 @@
 import express from "express";
-import {
-  createStory,
-  deleteStory,
-  viewedStory,
-} from "../controllers/storyController.js";
+import { createStory, deleteStory } from "../controllers/storyController.js";
 import { protect } from "../middlewares/protectMiddleware.js";
 import { uploadSingleFile } from "../middlewares/multerUpload.js";
 import { uploadFileToCloudinary } from "../middlewares/cloudinaryUpload.js";
@@ -20,7 +16,6 @@ storyRouter.post(
   createStory,
 );
 
-storyRouter.patch("/story/:storyId", protect, viewedStory);
 storyRouter.delete("/story/:storyId", protect, deleteStory);
 
 export default storyRouter;

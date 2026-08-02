@@ -1,30 +1,30 @@
 import mongoose from "mongoose";
 
-const likesSchema = new mongoose.Schema(
+const viewSchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
     post: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Post",
+      required: true,
+    },
+    viewer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
   },
   { timestamps: true },
 );
 
-likesSchema.index(
+viewSchema.index(
   {
-    user: 1,
     post: 1,
+    viewer: 1,
   },
   {
     unique: true,
   },
 );
 
-const Like = mongoose.model("Like", likesSchema);
-export default Like;
+const View = mongoose.model("View", viewSchema);
+export default View;

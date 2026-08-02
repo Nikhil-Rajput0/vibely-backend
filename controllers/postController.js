@@ -19,25 +19,40 @@ export const getAllPosts = catchAsync(async (req, res, next) => {
 });
 
 export const createPost = catchAsync(async (req, res, next) => {
-  const { caption, media, location } = req.body;
+  const { caption, location, type = "post" } = req.body;
   const user = req.user.id;
 
   if (!req.file || !req.file.media) {
-    return next(new AppError("A post must contain an image or video", 400));
+    return next(new AppError("Please upload an image or video.", 400));
+  }
+
+  const isImage = req.file.mimetype.startsWith("image/");
+  const isVideo = req.file.mimetype.startsWith("video/");
+
+  // Validate type
+  if (!["post", "reel"].includes(type)) {
+    return next(new AppError("Invalid content type.", 400));
+  }
+
+  // Reel must be video
+  if (type === "reel" && !isVideo) {
+    return next(new AppError("A reel must contain a video.", 400));
   }
 
   const newPost = await Post.create({
     user,
     caption,
+    location,
+    type,
+    mediaType: isImage ? "image" : "video",
     media: req.file.media,
     cloudinaryId: req.file.publicId,
-    location,
   });
 
   res.status(201).json({
-    status: "Success",
-    newPost,
-    message: "Post Successfully created.",
+    status: "success",
+    message: `${type === "reel" ? "Reel" : "Post"} created successfully.`,
+    post: newPost,
   });
 });
 

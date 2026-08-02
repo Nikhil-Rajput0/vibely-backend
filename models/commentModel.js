@@ -7,28 +7,27 @@ const commentSchema = new mongoose.Schema(
       ref: "Post",
       required: true,
     },
+
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+
     text: {
       type: String,
       required: true,
       trim: true,
     },
-    likes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    createdAt: {
-      type: Date,
-      default: Date.now(),
+
+    likesCount: {
+      type: Number,
+      default: 0,
     },
   },
-  { toJSON: { virtuals: true }, toObject: { virtuals: true } },
+  {
+    timestamps: true,
+  },
 );
 
 const Comment = mongoose.model("Comment", commentSchema);

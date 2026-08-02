@@ -61,7 +61,8 @@ export const getSingleUser = catchAsync(async (req, res, next) => {
         { path: "user", select: "userName profilePic" },
         { path: "viewers", select: "userName profilePic" },
       ],
-    });
+    })
+    .populate("conversations");
 
   res.status(200).json({
     status: "success",

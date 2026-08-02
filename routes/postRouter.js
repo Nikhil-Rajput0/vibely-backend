@@ -8,9 +8,9 @@ import {
 import { protect } from "../middlewares/protectMiddleware.js";
 import { uploadSingleFile } from "../middlewares/multerUpload.js";
 import { uploadFileToCloudinary } from "../middlewares/cloudinaryUpload.js";
-import { likePost } from "../controllers/likesController.js";
 import { savedPosts } from "../controllers/savedPostController.js";
 import { validatePostVideo } from "../middlewares/validateVideoMiddleware.js";
+import { postViews } from "../controllers/postViewsController.js";
 
 const postRouter = express.Router();
 
@@ -27,8 +27,8 @@ postRouter
 
 postRouter.route("/usersAllPost/:userId").get(protect, getPostOfUser);
 
-postRouter.route("/post/:postId").post(protect, likePost);
 postRouter.route("/post/:postId").delete(protect, deletePost);
+postRouter.route("/post/:postId").post(protect, postViews);
 postRouter.route("/saved/:postId").post(protect, savedPosts);
 
 export default postRouter;

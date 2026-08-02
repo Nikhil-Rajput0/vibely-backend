@@ -12,7 +12,7 @@ const deleteExpiredStories = async () => {
 
     for (const story of stories) {
       await cloudinary.uploader.destroy(story.cloudinaryId, {
-        resource_type: "auto",
+        resource_type: story.type,
       });
 
       await Story.findByIdAndDelete(story._id);

@@ -70,13 +70,11 @@ const userSchema = new mongoose.Schema(
     },
     isOnline: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     lastSeen: {
       type: Date,
-      default: Date.now(),
     },
-    socketId: String,
 
     refreshToken: String,
     changedPasswordAt: Date,
@@ -109,6 +107,12 @@ userSchema.virtual("following", {
 userSchema.virtual("stories", {
   ref: "Story",
   foreignField: "user",
+  localField: "_id",
+});
+
+userSchema.virtual("conversations", {
+  ref: "Conversation",
+  foreignField: "participants",
   localField: "_id",
 });
 

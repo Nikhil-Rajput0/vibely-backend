@@ -24,34 +24,6 @@ export const createStory = catchAsync(async (req, res, next) => {
   });
 });
 
-export const viewedStory = catchAsync(async (req, res, next) => {
-  const { storyId } = req.params;
-  const viewerId = req.user.id;
-
-  const story = await Story.findById(storyId);
-
-  if (!story) {
-    return next(new AppError("These story is no longer exist", 404));
-  }
-
-  if (story.user.toString() === viewerId) {
-    return res.status(200).json({
-      status: "Success",
-      message: "Owner watched story",
-    });
-  }
-
-  const alreadyViewed = story.viewers?.some((id) => id.toString() != storyId);
-
-  if (!alreadyViewed) {
-    story.viewers?.push(viewerId);
-    await story.save({ validateBeforeSave: false });
-  }
-
-  res.status(200).json({
-    status: "Success",
-  });
-});
 
 export const deleteStory = catchAsync(async (req, res, next) => {
   const { storyId } = req.params;
