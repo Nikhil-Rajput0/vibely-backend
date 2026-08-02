@@ -1,6 +1,10 @@
 import express from "express";
 import { login, signUp } from "../controllers/authController.js";
-import { getAllUsers, getSingleUser } from "../controllers/userDetails.js";
+import {
+  getAllUsers,
+  getMe,
+  getSingleUser,
+} from "../controllers/userDetails.js";
 import {
   getFollowers,
   getFollowing,
@@ -15,6 +19,7 @@ userRouter.post("/login", login);
 
 userRouter.get("/allUsers", protect, getAllUsers);
 userRouter.get("/getUser/:userId", protect, getSingleUser);
+userRouter.get("/getMe", protect, getMe);
 
 userRouter.post("/followers/:userId", protect, toggleFollow);
 userRouter.get("/followers/:userId", protect, getFollowers);
