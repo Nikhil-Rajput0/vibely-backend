@@ -32,14 +32,28 @@ export const signUp = catchAsync(async (req, res, next) => {
   newUser.refreshToken = refreshToken;
   await newUser.save({ validateBeforeSave: false });
 
-  res.status(201).json({
-    status: "Sucess",
-    accessToken,
-    data: {
-      user: newUser,
-    },
-    message: "Sign Up Success.",
-  });
+  res
+    .status(201)
+    .cookie("accessToken", accessToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+      maxAge: 15 * 60 * 1000,
+    })
+    .cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
+    .json({
+      status: "Sucess",
+      accessToken,
+      data: {
+        user: newUser,
+      },
+      message: "Sign Up Success.",
+    });
 });
 
 export const login = catchAsync(async (req, res, next) => {
@@ -62,9 +76,23 @@ export const login = catchAsync(async (req, res, next) => {
   user.refreshToken = refreshToken;
   await user.save({ validateBeforeSave: false });
 
-  res.status(200).json({
-    status: "Sucess",
-    accessToken,
-    message: "Login Success.",
-  });
+  res
+    .status(200)
+    .cookie("accessToken", accessToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+      maxAge: 15 * 60 * 1000,
+    })
+    .cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
+    .json({
+      status: "Sucess",
+      accessToken,
+      message: "Login Success.",
+    });
 });

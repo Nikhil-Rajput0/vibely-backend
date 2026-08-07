@@ -48,12 +48,14 @@ const userSchema = new mongoose.Schema(
     },
     profilePic: {
       type: String,
-      default: " ",
+      default: "",
     },
+    profilePicId: { type: String, default: "" },
     coverPic: {
       type: String,
-      default: " ",
+      default: "",
     },
+    coverPicId: { type: String, default: "" },
     bio: String,
     website: String,
     location: String,

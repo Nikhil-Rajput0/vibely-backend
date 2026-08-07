@@ -23,4 +23,17 @@ const upload = multer({
   },
 });
 
+const uploadProfilePic = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+});
+
 export const uploadSingleFile = upload.single("media");
+
+export const uploadProfileAndCover = upload.fields([
+  { name: "profilePic", maxCount: 1 },
+  { name: "coverPic", maxCount: 1 },
+]);
