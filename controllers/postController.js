@@ -19,7 +19,7 @@ export const getAllPosts = catchAsync(async (req, res, next) => {
 });
 
 export const createPost = catchAsync(async (req, res, next) => {
-  const { caption, location, type = "post" } = req.body;
+  const { caption, location, type = "post", tag = [] } = req.body;
   const user = req.user.id;
 
   if (!req.file || !req.file.media) {
@@ -39,6 +39,22 @@ export const createPost = catchAsync(async (req, res, next) => {
     return next(new AppError("A reel must contain a video.", 400));
   }
 
+  const hashtagIds = [];
+
+  for (let tagName of tags) {
+    const cleanName = tagName.replace(/#/g, "").trim().toLowerCase();
+
+    if (cleanName) {
+      const tag = await Hashtag.findOneAndUpdate(
+        { name: cleanName },
+        { $inc: { postsCount: 1 } },
+        { new: true, upsert: true },
+      );
+
+      hashtagIds.push(tag._id);
+    }
+  }
+
   const newPost = await Post.create({
     user,
     caption,
@@ -47,6 +63,7 @@ export const createPost = catchAsync(async (req, res, next) => {
     mediaType: isImage ? "image" : "video",
     media: req.file.media,
     cloudinaryId: req.file.publicId,
+    hashtags: hashtagIds,
   });
 
   res.status(201).json({

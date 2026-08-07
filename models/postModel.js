@@ -44,7 +44,12 @@ const postSchema = new mongoose.Schema(
     sharesCount: { type: Number, default: 0 },
     commentsCount: { type: Number, default: 0 },
     shavesCount: { type: Number, default: 0 },
-    hashtags: [String],
+    hashtags: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Hashtag",
+      },
+    ],
 
     createdAt: {
       type: Date,

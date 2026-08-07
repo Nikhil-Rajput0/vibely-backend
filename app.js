@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 const corsOption = {
-  origin: ["http://localhost:8000"],
+  origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
   methods: ["GET", "PUT", "POST", "PATCH", "DELETE"],
   credentials: true,
   optionsSuccessStatus: 200,
