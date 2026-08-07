@@ -48,7 +48,8 @@ const userSchema = new mongoose.Schema(
     },
     profilePic: {
       type: String,
-      default: "",
+      default:
+        "https://res.cloudinary.com/fjspmokn/image/upload/v1786082691/Default_user_xa1io0.png",
     },
     profilePicId: { type: String, default: "" },
     coverPic: {
