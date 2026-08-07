@@ -65,6 +65,10 @@ export const login = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({ email }).select("+password");
 
+  if (!user.isVerified) {
+    return next(new AppError("You are not verified yet"));
+  }
+
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(
       new AppError("Email or password is incorrect, Please try again!", 401),
