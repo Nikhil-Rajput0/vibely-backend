@@ -25,7 +25,19 @@ export const protect = catchAsync(async (req, res, next) => {
     );
   }
 
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  let decoded;
+
+  if (req.cookies.refreshToken) {
+    decoded = await promisify(jwt.verify)(
+      token,
+      process.env.JWT_REFRESH_SECRET,
+    );
+  } else if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  }
 
   const currentUser = await User.findById(decoded.id);
 
