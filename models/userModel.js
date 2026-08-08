@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
       required: [true, "A user should have an unique username"],
+      lowercase: true,
       trim: true,
     },
     fullName: {
@@ -63,6 +64,7 @@ const userSchema = new mongoose.Schema(
     followersCount: Number,
     followingCount: Number,
     postsCount: Number,
+    isFamous: { type: Boolean, default: false },
     isVerified: {
       type: Boolean,
       default: false,
