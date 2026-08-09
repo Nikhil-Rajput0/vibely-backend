@@ -1,24 +1,44 @@
 import User from "../models/userModel.js";
+
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+
 import { deleteFromCloudinary } from "../middlewares/cloudinaryUpload.js";
 
-const filterObj = (obj, ...requiredFields) => {
+/*
+|--------------------------------------------------------------------------
+| Filter allowed fields
+|--------------------------------------------------------------------------
+*/
+
+const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
-  Object.keys(obj).forEach((el) => {
-    if (requiredFields.includes(el)) newObj[el] = obj[el];
+
+  Object.keys(obj).forEach((field) => {
+    if (allowedFields.includes(field)) {
+      newObj[field] = obj[field];
+    }
   });
 
   return newObj;
 };
 
+/*
+|--------------------------------------------------------------------------
+| Get All Users
+|--------------------------------------------------------------------------
+*/
+
 export const getAllUsers = catchAsync(async (req, res, next) => {
-  const user = await User.find()
+  const users = await User.find()
     .populate({
       path: "posts",
       populate: {
         path: "comments",
-        populate: { path: "user", select: "userName profilePic" },
+        populate: {
+          path: "user",
+          select: "userName profilePic",
+        },
       },
     })
     .populate({
@@ -32,11 +52,22 @@ export const getAllUsers = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: "Success",
-    result: user.length,
-    data: { user },
+
+    result: users.length,
+
+    data: {
+      users,
+    },
+
     message: "All users data is fetched.",
   });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Get Single User
+|--------------------------------------------------------------------------
+*/
 
 export const getSingleUser = catchAsync(async (req, res, next) => {
   const { userId } = req.params;
@@ -52,6 +83,7 @@ export const getSingleUser = catchAsync(async (req, res, next) => {
         },
       },
     })
+
     .populate({
       path: "followers",
       populate: {
@@ -59,6 +91,7 @@ export const getSingleUser = catchAsync(async (req, res, next) => {
         select: "userName fullName profilePic",
       },
     })
+
     .populate({
       path: "following",
       populate: {
@@ -66,31 +99,51 @@ export const getSingleUser = catchAsync(async (req, res, next) => {
         select: "userName fullName profilePic",
       },
     })
+
     .populate({
       path: "stories",
       populate: [
-        { path: "user", select: "userName profilePic" },
-        { path: "viewers", select: "userName profilePic" },
+        {
+          path: "user",
+          select: "userName profilePic",
+        },
+        {
+          path: "viewers",
+          select: "userName profilePic",
+        },
       ],
     })
+
     .populate("conversations");
+
+  if (!user) {
+    return next(new AppError("User not found.", 404));
+  }
 
   res.status(200).json({
     status: "success",
+
     user,
   });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Get Current User
+|--------------------------------------------------------------------------
+*/
 
 export const getMe = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
 
   if (!userId) {
     return next(
-      new AppError("You are not logged in to perform these action", 401),
+      new AppError("You are not logged in to perform this action.", 401),
     );
   }
 
   const user = await User.findById(userId)
+
     .populate({
       path: "posts",
       populate: {
@@ -101,6 +154,7 @@ export const getMe = catchAsync(async (req, res, next) => {
         },
       },
     })
+
     .populate({
       path: "followers",
       populate: {
@@ -108,6 +162,7 @@ export const getMe = catchAsync(async (req, res, next) => {
         select: "userName fullName profilePic",
       },
     })
+
     .populate({
       path: "following",
       populate: {
@@ -115,33 +170,55 @@ export const getMe = catchAsync(async (req, res, next) => {
         select: "userName fullName profilePic",
       },
     })
+
     .populate({
       path: "stories",
       populate: [
-        { path: "user", select: "userName profilePic" },
-        { path: "viewers", select: "userName profilePic" },
+        {
+          path: "user",
+          select: "userName profilePic",
+        },
+        {
+          path: "viewers",
+          select: "userName profilePic",
+        },
       ],
     })
+
     .populate({
       path: "conversations",
+
       populate: [
-        { path: "participants", select: "userName profilePic" },
-        { path: "lastMessage", select: "sender text" },
+        {
+          path: "participants",
+          select: "userName profilePic",
+        },
+
+        {
+          path: "lastMessage",
+          select: "sender text",
+        },
       ],
     });
 
+  if (!user) {
+    return next(new AppError("User not found.", 404));
+  }
+
   res.status(200).json({
     status: "Success",
+
     user,
   });
 });
 
 export const updateMe = catchAsync(async (req, res, next) => {
   if (req.body.password || req.body.passwordConfirm) {
-    return next(new AppError("These route is not for password reset", 403));
+    return next(new AppError("This route is not for password reset.", 403));
   }
 
   const currentUser = await User.findById(req.user.id);
+
   if (!currentUser) {
     return next(new AppError("User not found.", 404));
   }
@@ -152,28 +229,24 @@ export const updateMe = catchAsync(async (req, res, next) => {
     "fullName",
     "bio",
     "website",
+    "isPrivate",
   );
 
-  const files = req.files || {};
-
-  if (files.profilePic && files.profilePic.length > 0) {
-    const file = files.profilePic[0];
-
+  if (req.uploadedProfile) {
     if (currentUser.profilePicId) {
-      await deleteFromCloudinary(currentUser.profilePicId);
+      await deleteFromCloudinary(currentUser.profilePicId, "image");
     }
-    filteredObj.profilePic = file.media;
-    filteredObj.profilePicId = file.publicId;
+
+    filteredObj.profilePic = req.uploadedProfile.url;
+    filteredObj.profilePicId = req.uploadedProfile.publicId;
   }
 
-  if (files.coverPic && files.coverPic.length > 0) {
-    const file = files.coverPic[0];
-
+  if (req.uploadedCover) {
     if (currentUser.coverPicId) {
-      await deleteFromCloudinary(currentUser.coverPicId);
+      await deleteFromCloudinary(currentUser.coverPicId, "image");
     }
-    filteredObj.coverPic = file.media;
-    filteredObj.coverPicId = file.publicId;
+    filteredObj.coverPic = req.uploadedCover.url;
+    filteredObj.coverPicId = req.uploadedCover.publicId;
   }
 
   const user = await User.findByIdAndUpdate(req.user.id, filteredObj, {
@@ -182,10 +255,12 @@ export const updateMe = catchAsync(async (req, res, next) => {
   });
 
   if (!user) {
-    return next(new AppError("User Updation failed", 403));
+    return next(new AppError("User updation failed.", 403));
   }
 
-  res
-    .status(203)
-    .json({ status: "Success", user, message: "User Update Successfully" });
+  res.status(200).json({
+    status: "Success",
+    user,
+    message: "User updated successfully.",
+  });
 });

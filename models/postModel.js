@@ -1,5 +1,26 @@
 import mongoose from "mongoose";
 
+const mediaSchema = new mongoose.Schema(
+  {
+    url: {
+      type: String,
+      required: true,
+    },
+
+    publicId: {
+      type: String,
+      required: true,
+    },
+
+    type: {
+      type: String,
+      enum: ["image", "video"],
+      required: true,
+    },
+  },
+  { _id: false },
+);
+
 const postSchema = new mongoose.Schema(
   {
     user: {
@@ -14,19 +35,27 @@ const postSchema = new mongoose.Schema(
       default: "post",
     },
 
-    caption: String,
-
-    mediaType: {
+    caption: {
       type: String,
-      required: [true, "A post must contain the type of media"],
+      trim: true,
+      maxlength: 2200,
     },
 
     media: {
-      type: String,
-      required: [true, "A post must contain image or video"],
+      type: [mediaSchema],
+      required: true,
+      validate: {
+        validator: function (value) {
+          return value && value.length > 0 && value.length <= 10;
+        },
+        message: "A post must contain between 1 and 10 media files.",
+      },
     },
 
-    location: String,
+    location: {
+      type: String,
+      trim: true,
+    },
 
     visibility: {
       type: String,
@@ -34,16 +63,31 @@ const postSchema = new mongoose.Schema(
       default: "public",
     },
 
-    cloudinaryId: {
-      type: String,
-      required: true,
+    likesCount: {
+      type: Number,
+      default: 0,
     },
 
-    likesCount: { type: Number, default: 0 },
-    viewsCount: { type: Number, default: 0 },
-    sharesCount: { type: Number, default: 0 },
-    commentsCount: { type: Number, default: 0 },
-    shavesCount: { type: Number, default: 0 },
+    viewsCount: {
+      type: Number,
+      default: 0,
+    },
+
+    sharesCount: {
+      type: Number,
+      default: 0,
+    },
+
+    commentsCount: {
+      type: Number,
+      default: 0,
+    },
+
+    savesCount: {
+      type: Number,
+      default: 0,
+    },
+
     hashtags: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -53,10 +97,17 @@ const postSchema = new mongoose.Schema(
 
     createdAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
     },
   },
-  { toJSON: { virtuals: true }, toObject: { virtuals: true } },
+  {
+    toJSON: {
+      virtuals: true,
+    },
+    toObject: {
+      virtuals: true,
+    },
+  },
 );
 
 postSchema.virtual("comments", {
@@ -66,4 +117,5 @@ postSchema.virtual("comments", {
 });
 
 const Post = mongoose.model("Post", postSchema);
+
 export default Post;

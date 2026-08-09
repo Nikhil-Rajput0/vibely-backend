@@ -3,37 +3,46 @@ import AppError from "../utils/appError.js";
 
 const storage = multer.memoryStorage();
 
+const allowedVideoTypes = ["video/mp4", "video/webm", "video/quicktime"];
+
 const fileFilter = (req, file, cb) => {
-  const allowedMimeTypes = ["video/mp4", "video/webm", "video/quicktime"];
-  if (
-    file.mimetype.startsWith("image") ||
-    allowedMimeTypes.includes(file.mimetype)
-  ) {
-    cb(null, true);
-  } else {
-    cb(new AppError("Only image and videos are allowed."), false);
+  const isImage = file.mimetype.startsWith("image/");
+  const isVideo = allowedVideoTypes.includes(file.mimetype);
+
+  if (isImage || isVideo) {
+    return cb(null, true);
   }
+
+  cb(new AppError("Only image and video files are allowed.", 400), false);
 };
 
-const upload = multer({
+const mediaUpload = multer({
   storage,
   fileFilter,
   limits: {
     fileSize: 50 * 1024 * 1024,
+    files: 10,
   },
 });
 
-const uploadProfilePic = multer({
+const profileUpload = multer({
   storage,
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024,
+    files: 2,
   },
 });
 
-export const uploadSingleFile = upload.single("media");
+export const uploadMediaFiles = mediaUpload.array("media", 10);
 
-export const uploadProfileAndCover = upload.fields([
-  { name: "profilePic", maxCount: 1 },
-  { name: "coverPic", maxCount: 1 },
+export const uploadProfileAndCover = profileUpload.fields([
+  {
+    name: "profilePic",
+    maxCount: 1,
+  },
+  {
+    name: "coverPic",
+    maxCount: 1,
+  },
 ]);
