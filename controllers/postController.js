@@ -1,5 +1,5 @@
 import Post from "../models/postModel.js";
-import Hashtag from "../models/hashtagModel.js";
+import Hashtag from "../models/hashTagModel.js";
 import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
 import cloudinary from "../utils/cloudinary.js";

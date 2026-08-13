@@ -4,6 +4,7 @@ import globalErrorHandler from "./controllers/globalErrorController.js";
 import userRouter from "./routes/userRouter.js";
 import postRouter from "./routes/postRouter.js";
 import storyRouter from "./routes/storyRouter.js";
+import hashtagRouter from "./routes/hashtagRouter.js";
 import conversationRouter from "./routes/conversationRouter.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -35,6 +36,7 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/posts", postRouter);
 app.use("/api/v1/stories", storyRouter);
 app.use("/api/v1/conversations", conversationRouter);
+app.use("/api/v1/hashtags", hashtagRouter);
 
 app.use((req, res, next) => {
   return next(new AppError("These route does not exist", 404));
