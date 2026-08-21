@@ -5,6 +5,7 @@ import catchAsync from "../utils/catchAsync.js";
 
 export const toggleFollow = catchAsync(async (req, res, next) => {
   const { userId: targetUserId } = req.params;
+
   const currentUserId = req.user.id;
 
   // Prevent following yourself
@@ -30,34 +31,41 @@ export const toggleFollow = catchAsync(async (req, res, next) => {
 
   if (existingFollow) {
     await Follow.findByIdAndDelete(existingFollow._id);
-    message = "User unfollowed successfully.";
+
     isFollowing = false;
+    message = "User unfollowed successfully.";
+    await User.findByIdAndUpdate(targetUserId, {
+      $inc: {
+        followersCount: -1,
+      },
+    });
   } else {
     await Follow.create({
       follower: currentUserId,
       following: targetUserId,
     });
 
-    message = "User followed successfully.";
     isFollowing = true;
+    message = "User followed successfully.";
+
+    await User.findByIdAndUpdate(targetUserId, {
+      $inc: {
+        followersCount: 1,
+      },
+    });
   }
 
-  // Updated counts
   const followerCount = await Follow.countDocuments({
     following: targetUserId,
-  });
-
-  const followingCount = await Follow.countDocuments({
-    follower: targetUserId,
   });
 
   res.status(200).json({
     status: "success",
     message,
+
     data: {
       isFollowing,
       followerCount,
-      followingCount,
     },
   });
 });

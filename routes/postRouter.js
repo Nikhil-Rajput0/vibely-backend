@@ -5,6 +5,7 @@ import {
   deletePost,
   getAllPosts,
   getPostOfUser,
+  getSinglePost,
 } from "../controllers/postController.js";
 
 import { protect } from "../middlewares/protectMiddleware.js";
@@ -28,7 +29,10 @@ postRouter
   );
 
 postRouter.route("/usersAllPost/:userId").get(protect, getPostOfUser);
-postRouter.route("/post/:postId").delete(protect, deletePost);
+postRouter
+  .route("/post/:postId")
+  .get(protect, getSinglePost)
+  .delete(protect, deletePost);
 
 postRouter.route("/post/:postId").post(protect, postViews);
 postRouter.route("/saved/:postId").post(protect, savedPosts);

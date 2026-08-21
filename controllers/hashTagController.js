@@ -2,7 +2,7 @@ import Hashtag from "../models/hashTagModel.js";
 import catchAsync from "../utils/catchAsync.js";
 
 export const getAllHashtag = catchAsync(async (req, res, next) => {
-  const allHashtag = await Hashtag.find();
+  const allHashtag = await Hashtag.find().sort("-postsCount");
 
   if (!allHashtag) {
     return next();

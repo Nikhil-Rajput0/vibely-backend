@@ -165,6 +165,31 @@ export const getPostOfUser = catchAsync(async (req, res, next) => {
   });
 });
 
+export const getSinglePost = catchAsync(async (req, res, next) => {
+  const { postId } = req.params;
+  const post = await Post.findById(postId)
+    .populate({
+      path: "user",
+      select: "userName profilePic",
+    })
+    .populate({
+      path: "comments",
+      populate: {
+        path: "user",
+        select: "userName profilePic",
+      },
+    });
+
+  if (!postId || !post) {
+    return next(new AppError("The post no longer exist", 404));
+  }
+
+  res.status(200).json({
+    status: "Success",
+    post,
+  });
+});
+
 export const deletePost = catchAsync(async (req, res, next) => {
   const { postId } = req.params;
 

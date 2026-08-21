@@ -4,12 +4,7 @@ import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 
 import { deleteFromCloudinary } from "../middlewares/cloudinaryUpload.js";
-
-/*
-|--------------------------------------------------------------------------
-| Filter allowed fields
-|--------------------------------------------------------------------------
-*/
+import Follow from "../models/followsModel.js";
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -23,14 +18,9 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-/*
-|--------------------------------------------------------------------------
-| Get All Users
-|--------------------------------------------------------------------------
-*/
-
 export const getAllUsers = catchAsync(async (req, res, next) => {
   const users = await User.find()
+    .select("-password -role -email")
     .populate({
       path: "posts",
       populate: {
@@ -52,22 +42,13 @@ export const getAllUsers = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: "Success",
-
     result: users.length,
-
     data: {
       users,
     },
-
     message: "All users data is fetched.",
   });
 });
-
-/*
-|--------------------------------------------------------------------------
-| Get Single User
-|--------------------------------------------------------------------------
-*/
 
 export const getSingleUser = catchAsync(async (req, res, next) => {
   const { userId } = req.params;
@@ -83,7 +64,6 @@ export const getSingleUser = catchAsync(async (req, res, next) => {
         },
       },
     })
-
     .populate({
       path: "followers",
       populate: {
@@ -91,7 +71,6 @@ export const getSingleUser = catchAsync(async (req, res, next) => {
         select: "userName fullName profilePic",
       },
     })
-
     .populate({
       path: "following",
       populate: {
@@ -99,7 +78,6 @@ export const getSingleUser = catchAsync(async (req, res, next) => {
         select: "userName fullName profilePic",
       },
     })
-
     .populate({
       path: "stories",
       populate: [
@@ -113,28 +91,38 @@ export const getSingleUser = catchAsync(async (req, res, next) => {
         },
       ],
     })
-
     .populate("conversations");
 
   if (!user) {
     return next(new AppError("User not found.", 404));
   }
 
+  let isFollowing = false;
+
+  if (req.user) {
+    const currentUserId = req.user._id.toString();
+    const targetUserId = user._id.toString();
+
+    if (currentUserId !== targetUserId) {
+      const follow = await Follow.findOne({
+        follower: currentUserId,
+        following: targetUserId,
+      });
+
+      isFollowing = !!follow;
+    }
+  }
+  const userData = user.toObject();
+  userData.isFollowing = isFollowing;
+
   res.status(200).json({
     status: "success",
-
-    user,
+    user: userData,
   });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Get Current User
-|--------------------------------------------------------------------------
-*/
-
 export const getMe = catchAsync(async (req, res, next) => {
-  const userId = req.user.id;
+  const userId = req.user._id;
 
   if (!userId) {
     return next(
